@@ -1,25 +1,84 @@
-import sys, pygame
+import pygame
+
 pygame.init()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("AI Shooter - Imanuel Vancauteren & Seppe Coninx")
 
-size = width, height = 320, 240
-speed = [1, 1]
-black = 0, 0, 0
+#Spawn position
+x = 10
+y = 10
 
-screen = pygame.display.set_mode(size)
+#Character size
+width = 30
+height = 30
 
-ball = pygame.image.load("intro_ball.gif")
-ballrect = ball.get_rect()
+#Move pixels
+move = 5
 
-while 1:
+walkRight = pygame.image.load('rightsprite.png')
+walkLeft = pygame.image.load('leftsprite.png')
+walkTop = pygame.image.load('topsprite.png')
+walkBottom = pygame.image.load('bottomsprite.png')
+
+right = False
+left = False
+bottom = False
+top = False
+walkCount = 0
+
+def gameWindow():
+    global walkCount
+    if left:
+        screen.blit(walkLeft, (x,y))
+    elif right:
+        screen.blit(walkRight, (x,y))
+    elif top:
+        screen.blit(walkTop, (x,y))
+    elif bottom:
+        screen.blit(walkBottom, (x,y))
+    else:
+        screen.blit(walkBottom, (x, y))
+    pygame.display.update()
+
+run = True
+clock = pygame.time.Clock()
+
+#Game loop
+while run:
+    clock.tick(30)
+
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.QUIT:
+            run = False
 
-    ballrect = ballrect.move(speed)
-    if ballrect.left < 0 or ballrect.right > width:
-        speed[0] = -speed[0]
-    if ballrect.top < 0 or ballrect.bottom > height:
-        speed[1] = -speed[1]
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and x > move:
+        x -= move
+        left = True
+        right = False
+        top = False
+        bottom = False
+    elif keys[pygame.K_RIGHT] and x < 800 - move - width:
+        x += move
+        left = False
+        right = True
+        top = False
+        bottom = False
+    elif keys[pygame.K_UP] and y > move:
+        y -= move
+        left = False
+        right = False
+        top = True
+        bottom = False
+    elif keys[pygame.K_DOWN] and y < 600 - height - move:
+        y += move
+        left = False
+        right = False
+        top = False
+        bottom = True
 
-    screen.fill(black)
-    screen.blit(ball, ballrect)
-    pygame.display.flip()
+    screen.fill((0,0,0))
+    pygame.draw.rect(screen, (255,0,0), (x,y, width, height))
+    gameWindow()
+
+pygame.quit()
