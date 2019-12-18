@@ -9,14 +9,17 @@
  Explanation video: http://youtu.be/mdTeqiWyFnc
 """
 import pygame
+import time
+
+
 
 # Create a player
 class player():
-    def __init__(self, x, y, orientation):
+    def __init__(self, x, y, lives, mines):
         self.x = x
         self.y = y
-        self.orientation = orientation  # 0=up,1=right,2=down,3=left
-        self.life = 100
+        self.lives = lives
+        self.mines = mines
 
 class agent():
     def __init__(self, x, y):
@@ -146,13 +149,13 @@ for row in range(10):
     grid.append([])
     for column in range(10):
         grid[row].append(0)  # Append a cell
-player = player(1,5,1)
-agent = agent(7,7)
+player = player(0, 0, 3, 3)
+agent = agent(9,9)
 
 # set player 1
 # set agent 2
-grid[1][5] = 1
-grid[7][7] = 2
+grid[0][0] = 1
+grid[9][9] = 2
 
 start = (agent.x, agent.y)
 end = (player.x, player.y)
@@ -161,6 +164,17 @@ path = astar(grid, start, end)
 print(path)
 # Initialize pygame
 pygame.init()
+
+startTime = time.time()
+lives = 3
+pygame.font.init()
+myfont = pygame.font.SysFont('Trebuchet MS', 30)
+textsurface = myfont.render('Level: 1', True, (0, 255, 0))
+test2: textsurface = myfont.render('Lives: ' + str(player.lives), True, (0, 255, 0))
+textRect = textsurface.get_rect()
+textRect2 = test2.get_rect()
+textRect.center = (552.5, 55)
+textRect2.center = (552.5, 95)
 
 
 def algo():
@@ -172,12 +186,21 @@ def algo():
     grid[agent.x][agent.y] = 2
 
 
+def drawUI():
+    endTime = time.time()
+    test1 = myfont.render("Time: " + str(int(endTime-startTime) - 3), True, (0, 255, 0))
+    textRect1 = test1.get_rect()
+    textRect1.center = (552.5, 15)
+    screen.blit(textsurface, textRect)
+    screen.blit(test1, textRect1)
+    screen.blit(test2, textRect2)
+
 # Set the HEIGHT and WIDTH of the screen
-WINDOW_SIZE = [450, 450]
+WINDOW_SIZE = [650, 455]
 screen = pygame.display.set_mode(WINDOW_SIZE)
 
 # Set title of screen
-pygame.display.set_caption("AI Shooter")
+pygame.display.set_caption("AI Game")
 
 # Loop until the user clicks the close button.
 done = False
@@ -249,7 +272,10 @@ while not done:
                               HEIGHT])
 
 
-    # Limit to 30 frames per second
+    drawUI()
+
+
+    # Limit to 30 frames per secon
     clock.tick(30)
 
     # Go ahead and update the screen with what we've drawn.
