@@ -10,6 +10,8 @@
 """
 import pygame
 import time
+import levels
+
 
 
 
@@ -20,12 +22,13 @@ class player():
         self.y = y
         self.lives = lives
         self.mines = mines
+        self.isAlive = True
 
 class agent():
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.life = True
+        self.isAlive = True
 
 class Node():
     """A node class for A* Pathfinding"""
@@ -94,7 +97,7 @@ def astar(maze, start, end):
                 continue
 
             # Make sure walkable terrain
-            if maze[node_position[0]][node_position[1]] != 0 and maze[node_position[0]][node_position[1]] != 1:
+            if maze[node_position[0]][node_position[1]] != 0 and maze[node_position[0]][node_position[1]] != 1 and maze[node_position[0]][node_position[1]] != 4 :
                 continue
 
             # Create new node
@@ -128,6 +131,7 @@ def astar(maze, start, end):
 
 # Define some colors
 BLACK = (0, 0, 0)
+YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
@@ -151,11 +155,7 @@ for row in range(10):
         grid[row].append(0)  # Append a cell
 player = player(0, 0, 3, 3)
 agent = agent(9,9)
-
-# set player 1
-# set agent 2
-grid[0][0] = 1
-grid[9][9] = 2
+grid = levels.levelOne
 
 start = (agent.x, agent.y)
 end = (player.x, player.y)
@@ -169,31 +169,40 @@ startTime = time.time()
 lives = 3
 pygame.font.init()
 myfont = pygame.font.SysFont('Trebuchet MS', 30)
-textsurface = myfont.render('Level: 1', True, (0, 255, 0))
-test2: textsurface = myfont.render('Lives: ' + str(player.lives), True, (0, 255, 0))
-textRect = textsurface.get_rect()
-textRect2 = test2.get_rect()
-textRect.center = (552.5, 55)
-textRect2.center = (552.5, 95)
+levelText = myfont.render('Level: 1', True, (0, 255, 0))
+livesText = myfont.render('Lives: ' + str(player.lives), True, (0, 255, 0))
+levelTextRect = levelText.get_rect()
+livesTextRect = livesText.get_rect()
+levelTextRect.center = (552.5, 55)
+livesTextRect.center = (552.5, 95)
+timeText = myfont.render("Time: " + str(0), True, (0, 255, 0))
+timeTextRect = timeText.get_rect()
+timeTextRect.center = (552.5, 15)
 
 
 def algo():
     maze = astar(grid, (agent.x, agent.y), (player.x, player.y))
     print(maze)
     grid[agent.x][agent.y] = 0
-    agent.x = maze[1][0]
-    agent.y = maze[1][1]
-    grid[agent.x][agent.y] = 2
+    if maze[1][0] == player.x and maze[1][1] == player.y:
+        agent.isAlive = False
+        player.lives = player.lives - 1
+    elif grid[maze[1][0]][maze[1][1]] == 4:
+        agent.isAlive = False
+        grid[maze[1][0]][maze[1][1]] = 0
+    else:
+        agent.x = maze[1][0]
+        agent.y = maze[1][1]
+        grid[agent.x][agent.y] = 2
 
 
 def drawUI():
     endTime = time.time()
-    test1 = myfont.render("Time: " + str(int(endTime-startTime) - 3), True, (0, 255, 0))
-    textRect1 = test1.get_rect()
-    textRect1.center = (552.5, 15)
-    screen.blit(textsurface, textRect)
-    screen.blit(test1, textRect1)
-    screen.blit(test2, textRect2)
+    timeText = myfont.render("Time: " + str(int(endTime - startTime) - 3), True, (0, 255, 0))
+    livesText = myfont.render('Lives: ' + str(player.lives), True, (0, 255, 0))
+    screen.blit(timeText, timeTextRect)
+    screen.blit(levelText, levelTextRect)
+    screen.blit(livesText, livesTextRect)
 
 # Set the HEIGHT and WIDTH of the screen
 WINDOW_SIZE = [650, 455]
@@ -221,35 +230,31 @@ while not done:
             column = pos[0] // (WIDTH + MARGIN)
             row = pos[1] // (HEIGHT + MARGIN)
             # Set that location to one
-            grid[row][column] = 3
-            print("Click ", pos, "Grid coordinates: ", row, column)
+            grid[row][column] = 4
+            print("Mine planted: ", pos, "Grid coordinates: ", row, column)
         elif keys[pygame.K_LEFT] and player.y > 0:
             grid[player.x][player.y] = 0
             player.y = player.y - 1
             grid[player.x][player.y] = 1
-            player.orientation = 3  # 0=up,1=right,2=down,3=left
-            if agent.life:
+            if agent.isAlive:
                 algo()
         elif keys[pygame.K_RIGHT] and player.y < 9:
             grid[player.x][player.y] = 0
             player.y = player.y + 1
             grid[player.x][player.y] = 1
-            player.orientation = 1  # 0=up,1=right,2=down,3=left
-            if agent.life:
+            if agent.isAlive:
                 algo()
         elif keys[pygame.K_UP] and player.x > 0:
             grid[player.x][player.y] = 0
             player.x = player.x - 1
             grid[player.x][player.y] = 1
-            player.orientation = 0  # 0=up,1=right,2=down,3=left
-            if agent.life:
+            if agent.isAlive:
                 algo()
         elif keys[pygame.K_DOWN] and player.x < 9:
             grid[player.x][player.y] = 0
             player.x = player.x + 1
             grid[player.x][player.y] = 1
-            player.orientation = 2  # 0=up,1=right,2=down,3=left
-            if agent.life:
+            if agent.isAlive:
                 algo()
     # Set the screen background
     screen.fill(BLACK)
@@ -264,6 +269,8 @@ while not done:
                color = RED
             elif grid[row][column] == 3:
                 color = PINK
+            elif grid[row][column] == 4:
+                color = YELLOW
             pygame.draw.rect(screen,
                              color,
                              [(MARGIN + WIDTH) * column + MARGIN,
