@@ -1,3 +1,13 @@
+"""
+ Example program to show using an array to back a grid on-screen.
+
+ Sample Python/Pygame Programs
+ Simpson College Computer Science
+ http://programarcadegames.com/
+ http://simpson.edu/computer-science/
+
+ Explanation video: http://youtu.be/mdTeqiWyFnc
+"""
 import pygame
 
 # Create a player
@@ -6,12 +16,13 @@ class player():
         self.x = x
         self.y = y
         self.orientation = orientation  # 0=up,1=right,2=down,3=left
+        self.life = 100
 
 class agent():
     def __init__(self, x, y):
         self.x = x
         self.y = y
-    
+        self.life = True
 
 class Node():
     """A node class for A* Pathfinding"""
@@ -70,7 +81,7 @@ def astar(maze, start, end):
 
         # Generate children
         children = []
-        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]: # Adjacent squares
+        for new_position in [(0, -1), (0, 1), (-1, 0), (1, 0)]: # Adjacent squares
 
             # Get node position
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1])
@@ -80,7 +91,7 @@ def astar(maze, start, end):
                 continue
 
             # Make sure walkable terrain
-            if maze[node_position[0]][node_position[1]] == 3:
+            if maze[node_position[0]][node_position[1]] != 0 and maze[node_position[0]][node_position[1]] != 1:
                 continue
 
             # Create new node
@@ -99,6 +110,8 @@ def astar(maze, start, end):
 
             # Create the f, g, and h values
             child.g = current_node.g + 1
+            #Manhattan distance (geen diagonalen meer)
+            #child.h = (abs(child.position[0] - end_node.position[0])) + (abs(child.position[1] - end_node.position[1]) )
             child.h = ((child.position[0] - end_node.position[0]) ** 2) + ((child.position[1] - end_node.position[1]) ** 2)
             child.f = child.g + child.h
 
@@ -109,6 +122,7 @@ def astar(maze, start, end):
 
             # Add the child to the open list
             open_list.append(child)
+
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -135,8 +149,8 @@ for row in range(10):
 player = player(1,5,1)
 agent = agent(7,7)
 
-# Set row 1, cell 5 to one. (Remember rows and
-# column numbers start at zero.)
+# set player 1
+# set agent 2
 grid[1][5] = 1
 grid[7][7] = 2
 
@@ -184,29 +198,36 @@ while not done:
             column = pos[0] // (WIDTH + MARGIN)
             row = pos[1] // (HEIGHT + MARGIN)
             # Set that location to one
-            grid[row][column] = -1
+            grid[row][column] = 3
             print("Click ", pos, "Grid coordinates: ", row, column)
         elif keys[pygame.K_LEFT] and player.y > 0:
             grid[player.x][player.y] = 0
             player.y = player.y - 1
             grid[player.x][player.y] = 1
-            algo()
-
+            player.orientation = 3  # 0=up,1=right,2=down,3=left
+            if agent.life:
+                algo()
         elif keys[pygame.K_RIGHT] and player.y < 9:
             grid[player.x][player.y] = 0
             player.y = player.y + 1
             grid[player.x][player.y] = 1
-            algo()
+            player.orientation = 1  # 0=up,1=right,2=down,3=left
+            if agent.life:
+                algo()
         elif keys[pygame.K_UP] and player.x > 0:
             grid[player.x][player.y] = 0
             player.x = player.x - 1
             grid[player.x][player.y] = 1
-            algo()
+            player.orientation = 0  # 0=up,1=right,2=down,3=left
+            if agent.life:
+                algo()
         elif keys[pygame.K_DOWN] and player.x < 9:
             grid[player.x][player.y] = 0
             player.x = player.x + 1
             grid[player.x][player.y] = 1
-            algo()
+            player.orientation = 2  # 0=up,1=right,2=down,3=left
+            if agent.life:
+                algo()
     # Set the screen background
     screen.fill(BLACK)
 
@@ -218,7 +239,7 @@ while not done:
                 color = GREEN
             elif grid[row][column] == 2:
                color = RED
-            elif grid[row][column] == -1:
+            elif grid[row][column] == 3:
                 color = PINK
             pygame.draw.rect(screen,
                              color,
