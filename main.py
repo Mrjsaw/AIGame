@@ -171,10 +171,13 @@ pygame.font.init()
 myfont = pygame.font.SysFont('Trebuchet MS', 30)
 levelText = myfont.render('Level: 1', True, (0, 255, 0))
 livesText = myfont.render('Lives: ' + str(player.lives), True, (0, 255, 0))
+minesText = myfont.render('Mines: ' + str(player.mines), True, (0, 255, 0))
 levelTextRect = levelText.get_rect()
 livesTextRect = livesText.get_rect()
+minesTextRect = minesText.get_rect()
 levelTextRect.center = (552.5, 55)
 livesTextRect.center = (552.5, 95)
+minesTextRect.center = (552.5, 135)
 timeText = myfont.render("Time: " + str(0), True, (0, 255, 0))
 timeTextRect = timeText.get_rect()
 timeTextRect.center = (552.5, 15)
@@ -200,8 +203,10 @@ def drawUI():
     endTime = time.time()
     timeText = myfont.render("Time: " + str(int(endTime - startTime) - 3), True, (0, 255, 0))
     livesText = myfont.render('Lives: ' + str(player.lives), True, (0, 255, 0))
+    minesText = myfont.render('Mines: ' + str(player.mines), True, (0, 255, 0))
     screen.blit(timeText, timeTextRect)
     screen.blit(levelText, levelTextRect)
+    screen.blit(minesText, minesTextRect)
     screen.blit(livesText, livesTextRect)
 
 # Set the HEIGHT and WIDTH of the screen
@@ -223,34 +228,36 @@ while not done:
         keys = pygame.key.get_pressed()
         if event.type == pygame.QUIT:  # If user clicked close
             done = True  # Flag that we are done so we exit this loop
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and player.mines > 0:
             # User clicks the mouse. Get the position
             pos = pygame.mouse.get_pos()
             # Change the x/y screen coordinates to grid coordinates
             column = pos[0] // (WIDTH + MARGIN)
             row = pos[1] // (HEIGHT + MARGIN)
             # Set that location to one
-            grid[row][column] = 4
-            print("Mine planted: ", pos, "Grid coordinates: ", row, column)
-        elif keys[pygame.K_LEFT] and player.y > 0:
+            if grid[row][column] != 3:
+                grid[row][column] = 4
+                player.mines = player.mines - 1
+                print("Mine planted: ", pos, "Grid coordinates: ", row, column)
+        elif keys[pygame.K_LEFT] and player.y > 0 and grid[player.x][player.y - 1] != 3:
             grid[player.x][player.y] = 0
             player.y = player.y - 1
             grid[player.x][player.y] = 1
             if agent.isAlive:
                 algo()
-        elif keys[pygame.K_RIGHT] and player.y < 9:
+        elif keys[pygame.K_RIGHT] and player.y < 9 and grid[player.x][player.y + 1] != 3:
             grid[player.x][player.y] = 0
             player.y = player.y + 1
             grid[player.x][player.y] = 1
             if agent.isAlive:
                 algo()
-        elif keys[pygame.K_UP] and player.x > 0:
+        elif keys[pygame.K_UP] and player.x > 0 and grid[player.x - 1][player.y] != 3:
             grid[player.x][player.y] = 0
             player.x = player.x - 1
             grid[player.x][player.y] = 1
             if agent.isAlive:
                 algo()
-        elif keys[pygame.K_DOWN] and player.x < 9:
+        elif keys[pygame.K_DOWN] and player.x < 9 and grid[player.x + 1][player.y] != 3:
             grid[player.x][player.y] = 0
             player.x = player.x + 1
             grid[player.x][player.y] = 1
