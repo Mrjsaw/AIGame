@@ -9,7 +9,7 @@ It's a simple wave based 2D top view game where the objective is to kill the AI 
 You must have python 3.7 installed (PyGame does not support 3.8 or higher for now)
 Run this from any command line that has python 3.7 installed.
 
-# Pygame instalation:
+# Pygame installation:
 >pip install pygame
 
 # Run Game:
