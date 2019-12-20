@@ -1,10 +1,12 @@
+# A* pathfinding grid based game
+
 This project was submitted as a school project for our AI class. 
 It's a simple wave based 2D top view game where the objective is to kill the AI using mines.
 
 
 # How to play:
 
-You must have python 3.7 installed (PyGame does not support 3.8 for now)
+You must have python 3.7 installed (PyGame does not support 3.8 or higher for now)
 Run this from any command line that has python 3.7 installed.
 
 # Pygame instalation:
